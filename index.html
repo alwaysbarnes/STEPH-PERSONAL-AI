@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#070a14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>STEPH — Personal AI Assistant</title>
+  <meta name="description" content="STEPH is a sophisticated personal AI assistant with multilingual intelligence in English, Twi (Akan), and Ghanaian Pidgin.">
+  <link rel="icon" type="image/svg+xml" href="steph-logo.svg">
+  <link rel="stylesheet" href="style.css">
+  <!-- Boxicons for clean modern UI iconography -->
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebarOverlay" class="sidebar-mobile-overlay"></div>
+
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+      <!-- Sidebar Header / Branding -->
+      <div class="sidebar-header">
+        <div class="brand-wrapper" id="brandHomeBtn" title="STEPH Personal AI">
+          <div class="brand-logo-container">
+            <img src="steph-logo.svg" alt="STEPH Logo" class="brand-logo-img">
+          </div>
+          <div class="brand-info">
+            <span class="brand-name">STEPH</span>
+            <span class="brand-tagline">
+              <span>Personal AI</span>
+              <span class="brand-ghana-flag" title="Ghanaian Multilingual Intelligence">🇬🇭</span>
+            </span>
+          </div>
+        </div>
+        <button id="sidebarCollapseBtn" class="sidebar-close-btn" title="Collapse Sidebar (Ctrl+B)">
+          <i class='bx bx-chevron-left' style="font-size: 20px;"></i>
+        </button>
+      </div>
+
+      <!-- New Chat Button -->
+      <div class="sidebar-actions">
+        <button id="newChatBtn" class="new-chat-btn" title="Start new conversation">
+          <div class="new-chat-btn-left">
+            <div class="new-chat-icon-badge">
+              <i class='bx bx-plus'></i>
+            </div>
+            <span>New Chat</span>
+          </div>
+          <span class="new-chat-shortcut">Ctrl+K</span>
+        </button>
+      </div>
+
+      <!-- Search Conversations -->
+      <div class="sidebar-search-box">
+        <div class="search-input-wrapper">
+          <i class='bx bx-search search-icon'></i>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search conversations...">
+          <button id="clearSearchBtn" class="clear-search-btn" title="Clear search">
+            <i class='bx bx-x'></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Conversations Feed -->
+      <div id="sidebarChats" class="sidebar-chats">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+
+      <!-- Sidebar Footer / Profile & Settings -->
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar-small">ME</div>
+          <div class="user-info-text">
+            <span class="user-name">Personal Space</span>
+            <span id="activeModelTag" class="user-status">Gemini 3.8 Flash</span>
+          </div>
+        </div>
+        <button id="openSettingsBtn" class="sidebar-settings-btn" title="AI Settings & API Keys">
+          <i class='bx bx-cog' style="font-size: 18px;"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CHAT AREA -->
+    <main class="main-chat">
+      <!-- Top Header -->
+      <header class="chat-header">
+        <div class="header-left">
+          <button id="sidebarExpandBtn" class="sidebar-toggle-btn" title="Toggle Sidebar">
+            <i class='bx bx-menu' style="font-size: 20px;"></i>
+          </button>
+          <div class="header-title-box">
+            <h1 id="currentChatTitle" class="header-chat-title">New Conversation</h1>
+            <div class="header-steph-pill">
+              <span id="stephStatusDot" class="status-dot-active"></span>
+              <span id="stephStatusText">STEPH Online</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Language Mode Selector -->
+          <div class="lang-selector-wrapper">
+            <button id="langSelectorBtn" class="lang-selector-btn" title="Change Language Mode">
+              <i class='bx bx-globe' style="color: var(--pink-light);"></i>
+              <span id="activeLangLabel">Auto-Detect</span>
+              <i class='bx bx-chevron-down' style="font-size: 14px;"></i>
+            </button>
+            <div id="langDropdownMenu" class="lang-dropdown-menu">
+              <div class="lang-option selected" data-lang="auto">
+                <span>🌐 Auto (English • Twi • Pidgin)</span>
+                <i class='bx bx-check check-icon'></i>
+              </div>
+              <div class="lang-option" data-lang="twi">
+                <span>🇬🇭 Akan / Twi</span>
+              </div>
+              <div class="lang-option" data-lang="pidgin">
+                <span>🗣️ Ghanaian Pidgin</span>
+              </div>
+              <div class="lang-option" data-lang="english">
+                <span>🇬🇧 English</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clear / Restart Chat -->
+          <button id="clearChatBtn" class="header-action-icon-btn" title="Clear current messages">
+            <i class='bx bx-trash'></i>
+          </button>
+
+          <!-- Settings Trigger -->
+          <button id="headerSettingsBtn" class="header-action-icon-btn" title="Settings & Providers">
+            <i class='bx bx-slider-alt'></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Messages Scroll Area -->
+      <div id="chatMessagesContainer" class="chat-messages-container">
+        <!-- WELCOME SCREEN (Shown when empty chat) -->
+        <div id="welcomeScreen" class="welcome-screen">
+          <div class="welcome-hero-logo">
+            <img src="steph-logo.svg" alt="STEPH Logo">
+          </div>
+          <h2 class="welcome-greeting-title">
+            Akwaaba! I'm <span class="name-gradient">STEPH</span>
+          </h2>
+          <p class="welcome-subtitle">
+            Your personal AI assistant crafted with Ghanaian warmth, sharp wit, and deep intellect. Ask me anything in English, Twi, or Ghanaian Pidgin.
+          </p>
+
+          <div class="multilingual-pill-row">
+            <span class="flag">🇬🇭</span>
+            <span>Fluent in: English • Asante/Akuapem Twi • Ghanaian Pidgin</span>
+          </div>
+
+          <!-- Quick Suggestion Cards -->
+          <div class="welcome-cards-grid">
+            <div class="prompt-card" data-prompt="Kyerɛ me sɛnea yɛka 'Good morning, hope your family is doing well' wɔ Twi mu, na kyerɛ me aseɛ foforɔ bi.">
+              <div class="prompt-card-header">
+                <i class='bx bx-conversation'></i>
+                <span>AKAN / TWI CHAT</span>
+              </div>
+              <div class="prompt-card-title">"Kyerɛ me sɛnea yɛka 'Good morning, hope your family is doing well' wɔ Twi mu..."</div>
+              <div class="prompt-card-desc">Practice greetings and Akan cultural etiquette</div>
+            </div>
+
+            <div class="prompt-card" data-prompt="Chale STEPH, how you dey? Help me write a sharp, punchy message give my crew say we dey link up this evening for some good food.">
+              <div class="prompt-card-header">
+                <i class='bx bx-chat'></i>
+                <span>GHANAIAN PIDGIN</span>
+              </div>
+              <div class="prompt-card-title">"Chale STEPH, how you dey? Help me write a sharp message give my crew..."</div>
+              <div class="prompt-card-desc">Lively, authentic banter and local messaging</div>
+            </div>
+
+            <div class="prompt-card" data-prompt="Help me brainstorm 3 high-impact tech or commerce startup concepts tailored for Accra and the West African market.">
+              <div class="prompt-card-header">
+                <i class='bx bx-bulb'></i>
+                <span>INNOVATION & STRATEGY</span>
+              </div>
+              <div class="prompt-card-title">"Help me brainstorm 3 high-impact tech startup concepts for Accra..."</div>
+              <div class="prompt-card-desc">Market analysis, business logic, and creative ideation</div>
+            </div>
+
+            <div class="prompt-card" data-prompt="Write a clean, modern JavaScript function with debounce, error handling, and TypeScript types for an autocomplete search input.">
+              <div class="prompt-card-header">
+                <i class='bx bx-code-alt'></i>
+                <span>ENGINEERING & CODE</span>
+              </div>
+              <div class="prompt-card-title">"Write a clean modern JavaScript function with debounce and error handling..."</div>
+              <div class="prompt-card-desc">Full code blocks, explanations, and modern practices</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Messages Flow -->
+        <div id="messagesList" class="chat-messages-inner" style="display: none;">
+          <!-- Messages will be appended here dynamically -->
+        </div>
+      </div>
+
+      <!-- Input Area & Controls -->
+      <footer class="chat-input-area">
+        <div class="chat-input-container">
+          <!-- Stop Generating Floating Action -->
+          <div id="stopGeneratingContainer" class="stop-generating-container" style="display: none;">
+            <button id="stopGeneratingBtn" class="stop-generating-btn">
+              <i class='bx bx-stop-circle'></i>
+              <span>Stop Generating</span>
+            </button>
+          </div>
+
+          <!-- Staged Attachments Preview Tray -->
+          <div id="stagedAttachmentsTray" class="staged-attachments-tray">
+            <!-- Staged chips will appear here -->
+          </div>
+
+          <!-- Input Box Form -->
+          <div class="input-box-wrapper">
+            <textarea
+              id="messageInput"
+              class="chat-textarea"
+              placeholder="Ask STEPH anything in English, Twi, or Pidgin..."
+              rows="1"
+            ></textarea>
+
+            <div class="input-actions-group">
+              <!-- Hidden File Input -->
+              <input 
+                type="file" 
+                id="fileInput" 
+                style="display: none;" 
+                multiple 
+                accept="image/*,.txt,.js,.py,.html,.css,.json,.md,.csv,.pdf"
+              >
+
+              <!-- File Attach Button -->
+              <button id="attachFileBtn" class="input-tool-btn" title="Attach file or image">
+                <i class='bx bx-paperclip'></i>
+              </button>
+
+              <!-- Speech Recognition / Voice Input Button -->
+              <button id="micBtn" class="input-tool-btn" title="Voice Input (Speech-to-text)">
+                <i class='bx bx-microphone'></i>
+              </button>
+
+              <!-- Send Message Button -->
+              <button id="sendBtn" class="send-btn" title="Send message (Enter)">
+                <i class='bx bxs-send'></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="input-disclaimer-footnote">
+            <span>Powered by Real AI Intelligence</span>
+            <span>•</span>
+            <span class="pill">English • Twi • Ghanaian Pidgin</span>
+            <span>•</span>
+            <span>Shift+Enter for new line</span>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" class="modal-backdrop">
+    <div class="settings-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <i class='bx bx-slider-alt' style="color: var(--pink-primary);"></i>
+          <span>STEPH Configuration</span>
+        </div>
+        <button id="closeSettingsBtn" class="modal-close-btn" title="Close settings">
+          <i class='bx bx-x' style="font-size: 20px;"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- AI Provider Field -->
+        <div class="setting-field">
+          <label class="setting-label" for="providerSelect">
+            <span>AI Backend Provider</span>
+            <span id="providerStatusTag" class="free-key-hint">Ready</span>
+          </label>
+          <select id="providerSelect" class="setting-select">
+            <option value="gemini" selected>Google Gemini (Recommended — Gemini 3.8 Flash)</option>
+            <option value="groq">Groq (Ultrafast — Llama 3.3 70B)</option>
+            <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+            <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
+            <option value="openrouter">OpenRouter (Multi-model aggregator)</option>
+          </select>
+          <p class="setting-desc">
+            STEPH connects directly to this LLM backend to power her multilingual Ghanaian intelligence.
+          </p>
+        </div>
+
+        <!-- API Key Input Field -->
+        <div class="setting-field">
+          <label class="setting-label" for="apiKeyInput">
+            <span>API Key</span>
+            <a id="getFreeKeyLink" href="https://aistudio.google.com/" target="_blank" class="free-key-hint">
+              Get free API key <i class='bx bx-link-external'></i>
+            </a>
+          </label>
+          <div class="setting-input-password-wrapper">
+            <input 
+              type="password" 
+              id="apiKeyInput" 
+              class="setting-input" 
+              placeholder="Enter your API key..."
+              autocomplete="off"
+            >
+            <button id="toggleApiKeyVisibility" class="toggle-pwd-btn" type="button" title="Show/Hide Key">
+              <i class='bx bx-hide'></i>
+            </button>
+          </div>
+          <p class="setting-desc">
+            Your key is kept safe and server-side. You can save it to <code>.env</code> or use it in this session.
+          </p>
+        </div>
+
+        <!-- Model Name (Customizable) -->
+        <div class="setting-field">
+          <label class="setting-label" for="modelInput">Model Name</label>
+          <input 
+            type="text" 
+            id="modelInput" 
+            class="setting-input" 
+            value="gemini-3.8-flash"
+            placeholder="e.g. gemini-3.8-flash, llama-3.3-70b-versatile, gpt-4o"
+          >
+        </div>
+
+        <!-- Language Preference -->
+        <div class="setting-field">
+          <label class="setting-label" for="defaultLangSelect">Default Assistant Language Mode</label>
+          <select id="defaultLangSelect" class="setting-select">
+            <option value="auto" selected>Auto-Detect & Match (English • Twi • Pidgin)</option>
+            <option value="twi">Always prioritize Twi (Akan)</option>
+            <option value="pidgin">Always prioritize Ghanaian Pidgin</option>
+            <option value="english">Always prioritize English</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="testConnectionBtn" class="btn-secondary">Test Connection</button>
+        <button id="saveSettingsBtn" class="btn-primary">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification element -->
+  <div id="toastNotice" class="toast-notice" style="display: none;"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
